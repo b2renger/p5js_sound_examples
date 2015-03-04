@@ -198,8 +198,6 @@ We will use the same approach as preivously, we will implement an object oriente
 
 
 
-
-
 ## Sid Lee
 _____________________________________________________________________________________________________
 Sid_lee_sonification : http://b2renger.github.io/pages_p5js/sidlee-sonification/index.html
@@ -209,5 +207,5 @@ This example will use socket.io to connect to a live API delivering sensor data 
 So you should hear it along this visual : https://sidlee.herokuapp.com/
 
 And here's the api I used : https://github.com/SidLeeParis/sidLeeAgenceConnectee
-and also a js fiddle from Xavier Seignard (the guy behind all the arduino stuff and the node server - https://github.com/xseignard) to understand how to use the code : http://jsfiddle.net/07acad0b/4/
+and also a js fiddle from Xavier (the guy behind all the arduino stuff and the node server - https://github.com/xseignard) to understand how to use the code : http://jsfiddle.net/07acad0b/4/
 
