@@ -116,7 +116,7 @@ var scaleParameters = function() {
   this.Spring_6 = 70;
   this.Spring_7 = 72; 
 }
-```javascript
+```
 - one for our simulation parameters :
 ```javascript
 var simulationParameters = function(){
@@ -194,7 +194,8 @@ Flock : http://b2renger.github.io/pages_p5js/flock/index.html
 For this example we will try to sonify one of the flocking algorithm of Daniel Shiffman :
 http://p5js.org/learn/examples/Simulate_Flocking.php
 
-We will use the same approach as preivously, we will implement an object oriented audio engine and each particle will have its own sound. We will also build a gui with dat.gui
+We will use the same approach as preivously, we will implement an object oriented audio engine and each particle will have its own sound. We will also build a gui with dat.gui.
+
 
 
 
