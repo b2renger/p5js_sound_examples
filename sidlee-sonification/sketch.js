@@ -99,35 +99,16 @@ function draw() {
 
 	var volE = constrain(int(map(wattValue,10000,100000,20,100)),20,100);
 	electricSound.setVolume(volE/100,0.15,0);
-	// println(volE);
 
   var filterFreq = int(map(lightValue,0,40,800,2000));
   filter.freq(filterFreq);
   filter.res(2);
 
 	
-	var date = new Date();
-
-	if (date.getHours() != lastHour){
-		lastHour = date.getHours();
-		
-		if (lastHour == 0){
-
-		}
-		else if (lastHour == 8){
-
-		}
-
-	}
-
-	
-  	
-  
-
   if (odd){
     stroke(col);
-  fill(col);
-  strokeWeight(1);
+    fill(col);
+    strokeWeight(1);
     var waveform = fft.waveform();  // analyze the waveform
     for (var i = 0; i < waveform.length; i++){
    	  var x = map(i, 0, waveform.length, 0, width);
@@ -137,8 +118,8 @@ function draw() {
   }
   else{
     stroke(col);
-  fill(col);
-  strokeWeight(1);
+    fill(col);
+    strokeWeight(1);
     var spectrum = fft.analyze();
     for (var i = 0; i < spectrum.length; i++) {
       var x = map(i, 0, spectrum.length, 0, width);
@@ -147,7 +128,7 @@ function draw() {
     }
   }
 
-
+  // this is the mute button in the right corner
   rect(width-15,10,7,10);
   quad(width-22,7,width-15,10,width-15,20,width-22,23);
 
@@ -167,9 +148,6 @@ function draw() {
   else{
     masterVolume(.75);
   }
-  
-  	
-
 }
 
 function mousePressed(){
@@ -182,8 +160,8 @@ function mousePressed(){
 
 function update_values(data){
    
-   	var datas = JSON.stringify(data);
-   	datas = JSON.parse(datas);
+  var datas = JSON.stringify(data);
+  datas = JSON.parse(datas);
 	
 	eventDate = datas.date;
 	eventID = datas._id;

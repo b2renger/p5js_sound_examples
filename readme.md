@@ -12,10 +12,11 @@ I also use dat.gui.js for the guis :
 Three examples right now :
 
 ##### Table of Contents  
-[Springs](##springs)  
-[Flock](##flock)  
-[Sid Lee sonification](##sidlee)
+[Springs](#springs)  
+[Flock](#flock)  
+[Sid Lee sonification](#sidlee)
 
+________________________________________________________________________________________________
 <a name="springs"/>
 ## Springs 
 ________________________________________________________________________________________________
@@ -55,7 +56,6 @@ function draw() {
   }
 }
 ```
-<a name="1"/>
 ### adding sound
 We will implement our audio engine, object oriented style, so each of our spring will have the same sound. We just want to do some basic amplitude modulation. So we need to create an oscillator and control it's volume with the displacement of each spring.
 
@@ -106,7 +106,6 @@ for (var i=0; i<springs.length; i++) {
 }
 ```
 
-<a name="2"/>
 ### Using dat.gui
 We gave a link to a dat.gui workshop at the top of the page.
 http://workshop.chromeexperiments.com/examples/gui/#1--Basic-Usage 
@@ -179,7 +178,7 @@ Don't forget to call it in the draw() loop and you also need to declare and init
   gui = new dat.GUI();
   initGui();
 ```
-<a name="3"/>
+
 ### Musical Scales
 Now we want to have several scales to tune our system. We use array to store several scales which are by the way just series of intervalls. If you look up the internet you should find these pretty fast.
 
@@ -194,6 +193,7 @@ var pentatonic_blues = [0, 2, 3, 4, 7, 8, 9, 12];
 var whole_tones = [0, 2, 4, 6, 8, 10, 12, 14];
 var diminished = [0, 2, 3, 5, 6, 8, 9, 11];
 ```
+____________________________________________________________________________________________________
 
 <a name="flock"/>
 ## Flock
@@ -337,7 +337,7 @@ Flock.prototype.update_audio = function(){
 }
 ```
 
-
+_____________________________________________________________________________________________________
 <a name="sidlee"/>
 ## Sid Lee
 _____________________________________________________________________________________________________
@@ -349,4 +349,124 @@ So you should hear it along this visual : https://sidlee.herokuapp.com/
 
 And here's the api I used : https://github.com/SidLeeParis/sidLeeAgenceConnectee
 and also a js fiddle from Xavier (the guy behind all the arduino stuff and the node server - https://github.com/xseignard) to understand how to use the code : http://jsfiddle.net/07acad0b/4/
+
+I need also to give credit to the samples as many sounds come from freesound.org. Thank you to : robinhood76, noisecollector, maj061785, localtalkradio, kyodon, toiletrolltube, mrauralization, ashleyxxpiano, jackjames-tomknevitt, timbre, rivernile7, stevious42.
+
+### Get the data
+
+First notice the two new js files : *sidlee-client.js* and *socket.io.js* those are used in js fiddle above to be able to connect to the api and get some data. So we declare and init a client, that will fire up the *update_values* function at the bottom of the code.
+
+```javascript
+var client = new SidLeeClient('https://sidlee.herokuapp.com/', update_values);
+```
+
+This *update_values* function is a parser of event, the client will pass data formated in JSON to our function. Each JSON packet as a field named **._id** we will use it to build an if statement to play sounds, adjust parameters etc.
+
+```javascript
+function update_values(data){
+  var datas = JSON.stringify(data);
+  datas = JSON.parse(datas);
+  
+  var eventID = datas._id; // the id
+  var eventDate = datas.date; // we can get the date
+  var eventValue = datas.value; // the value
+  var eventUnit = datas.unit; //and the unit of the value
+
+  if (eventID == 'sound'){
+    // do something if the event caught is identifyied as the sound sensor  
+  }
+}
+```
+
+Earlier I said 'each', but in fact one event has no id : it's about the ctrl+z event produce by the several apps people from sid lee are using. Here's the format of the object passed.
+
+```
+Object {date: "2015-02-18T16:44:08.562Z", value: 1, unit: "u", app: "InDesign", user: "Antoine"…}
+```
+So to catch it we just assume that if a JSON object passed has no *_id* field it's a 'ctrl+z' event.
+
+
+### making sound
+
+We have a lot of data : fridge door opening, opening of the main door, water stirred from the water dispenser etc. all those event are ponctual they happen once and won't happen again before a certain amount of time. We can use samples for those, when an event is caught the corresponding sound is played !
+
+First we need to preload the samples, it's best :
+
+```javascript
+var fridgeSound;
+
+function preload(){
+  soundFormats('ogg'); 
+  fridgeSound = loadSound('sounds/118435__localtalkradio__fridgeopen_sel.ogg');
+}
+```
+
+```javascript
+function update_values(data){
+   
+  var datas = JSON.stringify(data);
+  datas = JSON.parse(datas);
+
+  if (data._id == 'fridge'){
+    fridgeSound.play();
+  }
+```
+
+But that not all, we also get sensor data about ambient sound level in the office, electric consumption of the whole office, and ambient light level. For the sound level and the electric consumption we will use samples played in loop mode, and we will add a filter which frequency will be mapped to the light level.
+
+```javascript
+var officeSound;
+var electricSound;
+var filter;
+
+var lightValue;
+var officeValue;
+var wattValue;
+
+function preload(){
+  soundFormats('ogg'); 
+  officeSound = loadSound('sounds/259632__stevious42__office-background-1.ogg');
+  electricSound = loadSound('sounds/187931__mrauralization__electric-humming-sound.wav');
+}
+```
+
+In the setup() function, we create and connect our filter :
+
+```javascript
+  filter = new p5.BandPass();
+  officeSound.disconnect();
+  officeSound.connect(filter);
+
+  electricSound.disconnect();
+  electricSound.connect(filter);
+
+  officeSound.loop();
+  electricSound.loop();
+```
+
+And we adjust parameters in the draw()
+
+```javascript
+  var vol = int(map(soundValue,30,80,50,100));
+  officeSound.setVolume(vol/100,0.15,0);
+
+  var volE = constrain(int(map(wattValue,10000,100000,20,100)),20,100);
+  electricSound.setVolume(volE/100,0.15,0);
+
+  var filterFreq = int(map(lightValue,0,40,800,2000));
+  filter.freq(filterFreq);
+  filter.res(2);
+
+```
+
+### the vizualisation
+
+Well it's all here :
+- waveform visualisation : http://p5js.org/learn/examples/Sound_Oscillator_Frequency.php
+- spectrum visualisation : http://p5js.org/learn/examples/Sound_Frequency_Spectrum.php
+
+We just switch beetween them according to the *lightswitch* data while inverting the colors.
+
+
+
 
