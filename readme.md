@@ -11,6 +11,16 @@ I also use dat.gui.js for the guis :
 
 Three examples right now :
 
+##### Table of Contents  
+[Springs](##springs)  
+[adding sound](###1)  
+[dat.gui](###2)
+[musical scales](###3)
+[adding sound](###1)
+[Flock](##flock)  
+[Sid Lee sonification](##sidlee)
+
+<a name="springs"/>
 ## Springs 
 ________________________________________________________________________________________________
 http://b2renger.github.io/pages_p5js/springs/index.html
@@ -33,10 +43,8 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
 
   for (var i=0; i<8; i++) {
-  	s1 = new Spring( 50+ windowWidth*i/8, windowHeight/2,  20, 0.98, 1.0);
-  	s1.audio();
-  	s1.set_note(60 + i);
-    springs.push(s1);
+  	s1 = new Spring( 50+ windowWidth*i/8, windowHeight/2,  20, 0.98, 1.0); // create the spring
+    springs.push(s1); // put it in the springs array.
   }
 }
 
@@ -51,6 +59,7 @@ function draw() {
   }
 }
 ```
+<a name="1"/>
 ### adding sound
 We will implement our audio engine, object oriented style, so each of our spring will have the same sound. We just want to do some basic amplitude modulation. So we need to create an oscillator and control it's volume with the displacement of each spring.
 
@@ -92,6 +101,7 @@ for (var i=0; i<8; i++) {
 }
 ```
 And in the draw to update sound :
+
 ```javascript
 for (var i=0; i<springs.length; i++) {
     springs[i].update();
@@ -99,6 +109,8 @@ for (var i=0; i<springs.length; i++) {
     springs[i].display();
 }
 ```
+
+<a name="2"/>
 ### Using dat.gui
 We gave a link to a dat.gui workshop at the top of the page.
 http://workshop.chromeexperiments.com/examples/gui/#1--Basic-Usage 
@@ -171,7 +183,8 @@ Don't forget to call it in the draw() loop and you also need to declare and init
   gui = new dat.GUI();
   initGui();
 ```
-### Scales
+<a name="3"/>
+### Musical Scales
 Now we want to have several scales to tune our system. We use array to store several scales which are by the way just series of intervalls. If you look up the internet you should find these pretty fast.
 
 ```javascript
@@ -186,6 +199,7 @@ var whole_tones = [0, 2, 4, 6, 8, 10, 12, 14];
 var diminished = [0, 2, 3, 5, 6, 8, 9, 11];
 ```
 
+<a name="flock"/>
 ## Flock
 ____________________________________________________________________________________________________
 
@@ -197,7 +211,7 @@ http://p5js.org/learn/examples/Simulate_Flocking.php
 We will use the same approach as preivously, we will implement an object oriented audio engine and each particle will have its own sound. We will also build a gui with dat.gui.
 
 
-
+<a name="sidlee"/>
 ## Sid Lee
 _____________________________________________________________________________________________________
 Sid_lee_sonification : http://b2renger.github.io/pages_p5js/sidlee-sonification/index.html
