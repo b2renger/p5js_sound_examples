@@ -65,7 +65,7 @@ function Boid(x,y) {
   this.velocity = createVector(random(-1,1),random(1));
   this.position = createVector(x,y);
   this.r = 3.0;
-  this.maxspeed = 4;    // Maximum speed
+  this.maxspeed = 5;    // Maximum speed
   this.maxforce = 0.05; // Maximum steering force
 
   // this is new !
@@ -298,12 +298,12 @@ Flock.prototype.update_audio = function(){
   // take the distance beetween mouse and every object, and adjust amp, filter (doppler effect) and pan
   // we will also take into account the mask effect created by the head with a low pass filter
   for (var i = 0; i < this.boids.length; i++) {
-    var distance = dist(width/2,height/2,this.boids[i].position.x, this.boids[i].position.y);
+    var distance = dist(mouseX,mouseY,this.boids[i].position.x, this.boids[i].position.y);
 
     if (distance < sp.threshold){
       // first we draw a line for each boid we should hear
       stroke(0);
-      line(width/2,height/2,this.boids[i].position.x, this.boids[i].position.y);
+      line(mouseX,mouseY,this.boids[i].position.x, this.boids[i].position.y);
 
       // set global volume according to distance
       this.boids[i].s_setGain(map(distance,0,250,1,0));
@@ -311,7 +311,7 @@ Flock.prototype.update_audio = function(){
       this.boids[i].s_doppler(map(distance,0,250,1000,500));
 
       // now we need to calculate an angle to deal with the panoramic
-      var mouse = createVector(width/2,height/2);
+      var mouse = createVector(mouseX,mouseY);
       var temp = mouse.sub(this.boids[i].position);
       var angle = temp.heading();
       var pan_value = map(abs(angle),0,PI,-1,1); // we don't care if the boid is in front or behind us (it's just left / right)

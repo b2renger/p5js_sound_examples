@@ -13,10 +13,6 @@ Three examples right now :
 
 ##### Table of Contents  
 [Springs](##springs)  
-[adding sound](###1)  
-[dat.gui](###2)
-[musical scales](###3)
-[adding sound](###1)
 [Flock](##flock)  
 [Sid Lee sonification](##sidlee)
 
@@ -209,6 +205,137 @@ For this example we will try to sonify one of the flocking algorithm of Daniel S
 http://p5js.org/learn/examples/Simulate_Flocking.php
 
 We will use the same approach as preivously, we will implement an object oriented audio engine and each particle will have its own sound. We will also build a gui with dat.gui.
+
+We will work within the boid class first :
+
+We need to proptotype our sound engine : what we want is to prototype a cheap helicopter sound using sound synthesis. When you think about it a helicopter sound wise is nothing more than white noise with amplitude modulation. So if you read the Spring example earlier it's nothing new.
+
+```javascript
+Boid.prototype.boid_sound_engine = function(){
+  // a noise source to be modulated
+  // we will use the pan function of noise to place our object in a stereo field
+  this.noise = new p5.Noise();
+  this.noise.disconnect();
+  this.noise.amp(0.05,2);
+  this.noise.start();
+
+  // an osc to modulate the noise
+  // we will be able to adjust the frequency according to the speed of each object
+  this.osc = new p5.Oscillator('sine');
+  this.osc.disconnect();
+  this.osc.amp(1,2,0);
+  this.osc.freq(random(5,15));
+  this.osc.start();
+
+  // let's do the modulation !
+  this.noise.amp(this.osc,5,5);
+}
+
+```
+
+the frequency given to the oscillator will enable us to give an impression of speed : a small number will be perceived as slow, whether a big as fast. We will use this later on, as we have the speed of each boid in that flocking algorithm and of course we will map it to our sound.
+
+Now we have to think about what parameters we want to be able to hear : for instance we need to place a listener and we will need to know what is the relative position of each boid to . If you listen to a bunch of cars passing next to you, they will move in your auditory field passing from left to right, from close to far, sometimes slowly and sometimes very fast. If a car is behind you the noise you perceive won't be the same as if you face it.
+
+So having thought a bit about it we want to be able to make some crude spatialisation for our sounds (left, right, in front of you, behind), we will also want to have some kind of doppler effect :
+
+http://en.wikipedia.org/wiki/Doppler_effect
+
+For the spatialisation we will use the pan() method in the next part, for the doppler effect and the mask effect of your head we will use filters and bandpass for doppler et and a low pass for masking :
+
+```javascript
+  // now we need a filter, we will adjust it's parameters according to our simulation
+  // cutoff, and quality for a simulation of a doppler effect
+  this.filter = new p5.BandPass();
+  this.filter.disconnect();
+  this.filter.set(500,2);
+  
+  // connect our noise to our filter
+  this.noise.connect(this.filter);
+
+  // we will need another low pass filter :for the head 
+  this.lp = new p5.LowPass();
+  this.lp.freq(2000);
+
+  this.filter.connect(this.lp);
+
+```
+
+we also want to add a few helper functions to set things:
+```javascript
+Boid.prototype.s_setGain = function(value){
+    this.filter.amp(value);
+}
+
+Boid.prototype.s_doppler = function(value){
+    this.filter.set(value,2);
+}
+
+Boid.prototype.s_pan = function(value){
+  this.noise.pan(value);
+}
+
+Boid.prototype.s_lp = function(value){
+    this.lp.freq(value);
+}
+
+```
+
+First the speed, because it's easy enough. The veocity of each boid is stored in a variable *this.velocity* so we can calculate its magnitude with the .mag() method. So we basically just have to map it !
+
+```javascript
+Boid.prototype.s_adjustSpeed = function(){
+    this.osc.freq(map(this.velocity.mag(),0.5,5,5,10));
+}
+```
+Now we need to compute all our parameters taking into account the position of the listener and the position of the boid. Our listener will be the mouse postion facing up-screen. We will use a variable for the audibility threshold *sp.treshold* (it's part of our gui so it's part of a data strucure share by our programm and dat.GUI, sp stands for simulation parameters in the setup). If a boid is nearer than this treshold then we need to compute it's paramters, else its volume is null.
+
+```javascript
+Flock.prototype.update_audio = function(){
+  // take the distance beetween mouse and every object, and adjust amp, filter (doppler effect) and pan
+  // we will also take into account the mask effect created by the head with a low pass filter
+  for (var i = 0; i < this.boids.length; i++) {
+    var distance = dist(mouseX,mouseY,this.boids[i].position.x, this.boids[i].position.y);
+
+    if (distance < sp.threshold){
+      // first we draw a line for each boid we should hear
+      stroke(0);
+      line(mouseX,mouseY,this.boids[i].position.x, this.boids[i].position.y);
+
+      // set global volume according to distance
+      this.boids[i].s_setGain(map(distance,0,250,1,0));
+      // same for the frequency of the filter to simulate doppler effect
+      this.boids[i].s_doppler(map(distance,0,250,1000,500));
+
+      // now we need to calculate an angle to deal with the panoramic
+      var mouse = createVector(mouseX,mouseY);
+      var temp = mouse.sub(this.boids[i].position);
+      var angle = temp.heading();
+      var pan_value = map(abs(angle),0,PI,-1,1); // we don't care if the boid is in front or behind we will do it later
+      this.boids[i].s_pan(pan_value);
+
+      // deal with the masking effect of our head adjusting a low pass
+      var mask = 0;
+       if (angle<0){
+        mask = 1000;
+       }
+       else{
+        mask = 2500;
+       }
+       this.boids[i].s_lp(mask);
+       this.boids[i].lp.res((250-distance)/200); // resonance gets stronger when closer !
+
+      // adjust the frequency of the noise modulation to the actual object speed 
+      this.boids[i].s_adjustSpeed();
+    }
+    else{
+      this.boids[i].s_setGain(0); // just to be sure ...
+    }
+   
+  }
+
+}
+```
 
 
 <a name="sidlee"/>
