@@ -1,14 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-  <script language="javascript" src="../lib/p5.min.js"></script>
-  <!-- uncomment lines below to include extra p5 libraries -->
-	<script language="javascript" src="../lib/p5.dom.js"></script>
-  <script language="javascript" src="../lib/p5.sound.js"></script>
-  <script language="javascript" src="sketch.js"></script>	
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organic Motion + Sound</title>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
 
-  <!-- this line removes any default padding and style. you might only need one of these values set. -->
-  <style> body {padding: 0; margin: 0;} </style>
+  <script src="../lib/p5.min.js"></script>
+  <script src="../lib/p5.dom.js"></script>
+  <script src="../lib/p5.sound.js"></script>
+
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --text: #eaeaea;
+      --accent: #A8C3A8;
+      /* Celadon from your portfolio */
+      --panel: #141414;
+      --border: #2a2a2a;
+      --font-main: 'Space Grotesk', sans-serif;
+      --font-ui: 'Orbitron', sans-serif;
+    }
+
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-main);
+      overflow-x: hidden;
+      width: 100%;
+      height: 100%;
+    }
+
+    #start-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      transition: opacity 0.8s ease-in-out;
+    }
+
+    .start-content {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 40px;
+      max-width: 600px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      margin: 20px;
+    }
+
+    .start-content h1 {
+      font-family: var(--font-ui);
+      font-weight: 700;
+      margin-bottom: 24px;
+      margin-top: 0;
+      font-size: 2rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .start-content p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 16px;
+      color: #b0b0b0;
+    }
+
+    .start-content em {
+      color: var(--accent);
+      font-style: normal;
+    }
+
+    #start-btn {
+      margin-top: 24px;
+      background: transparent;
+      color: var(--text);
+      font-family: var(--font-ui);
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 12px 32px;
+      border: 2px solid var(--accent);
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    #start-btn:hover {
+      background: var(--accent);
+      color: var(--bg);
+      box-shadow: 0 0 20px rgba(168, 195, 168, 0.4);
+      transform: translateY(-2px);
+    }
+
+    /* Grid Layout */
+    #sketch-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+      padding: 24px;
+      width: 100%;
+      box-sizing: border-box;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+    }
+
+    .module {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    /* The circle inside each module  */
+    .module-canvas {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .controls {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    .control-btn {
+      background: transparent;
+      color: #888;
+      border: 1px solid #444;
+      padding: 6px 10px;
+      font-family: var(--font-ui);
+      font-size: 0.70rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+
+    .control-btn:hover {
+      color: var(--text);
+      border-color: var(--text);
+    }
+
+    .control-btn.active {
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
+    }
+
+    .control-btn.mute-btn {
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .control-btn.mute-btn.active {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .slider-group .labels {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-ui);
+      font-size: 0.75rem;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      background: transparent;
+    }
+
+    input[type=range]:focus {
+      outline: none;
+    }
+
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 4px;
+      cursor: pointer;
+      background: #333;
+      border-radius: 2px;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      height: 14px;
+      width: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      -webkit-appearance: none;
+      margin-top: -5px;
+    }
+  </style>
 </head>
 
 <body>
+
+  <div id="start-screen">
+    <div class="start-content">
+      <h1>Organic Motion</h1>
+      <p>Equations for organic motion is a <a href="https://codepen.io"
+          style="color:var(--accent); text-decoration:none;" target="_blank">codepen.io</a> sketch made by Justin
+        Windle.</p>
+      <p>I added sound to the mix. Since I discovered this link hidden in the code of a project with the mention:
+        <br><br><em>"this could be interesting here ..."</em>
+      </p>
+      <p>I always wondered what it sounds like.</p>
+      <button id="start-btn">Start Experience</button>
+    </div>
+  </div>
+
+  <div id="master-bar"
+    style="opacity: 0; padding: 24px 24px 0 24px; max-width: 400px; margin: 0 auto; transition: opacity 1s ease-in-out;">
+    <div class="slider-group">
+      <div class="labels">
+        <span>Master BPM</span>
+        <span id="master-bpm-val">120</span>
+      </div>
+      <input type="range" id="master-bpm-slider" min="30" max="240" step="1" value="120">
+    </div>
+  </div>
+
+  <div id="sketch-container">
+    <!-- modules will be appended here dynamically by p5 -->
+  </div>
+
+  <script src="sketch.js"></script>
+
 </body>
+
+</html>

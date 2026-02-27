@@ -1,13 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-  <script language="javascript" src="../lib/p5.min.js"></script>
-  <!-- uncomment lines below to include extra p5 libraries -->
-	<!--<script language="javascript" src="../addons/p5.dom.js"></script>-->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flock Sonification</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+
+  <script src="../lib/p5.min.js"></script>
   <script type="text/javascript" src="../lib/dat.gui.min.js"></script>
-  <script language="javascript" src="../lib/p5.sound.js"></script>
-  <script language="javascript" src="flock_sound_example.js"></script>
-  <!-- this line removes any default padding and style. you might only need one of these values set. -->
-  <style> body {padding: 0; margin: 0;} </style>
+  <script src="../lib/p5.sound.js"></script>
+
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --text: #eaeaea;
+      --accent: #A8C3A8;
+      --panel: #141414;
+      --border: #2a2a2a;
+      --font-main: 'Space Grotesk', sans-serif;
+      --font-ui: 'Orbitron', sans-serif;
+    }
+
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-main);
+      overflow-x: hidden;
+      width: 100%;
+      height: 100%;
+    }
+
+    #start-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      transition: opacity 0.8s ease-in-out;
+    }
+
+    .start-content {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 40px;
+      max-width: 600px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      margin: 20px;
+    }
+
+    .start-content h1 {
+      font-family: var(--font-ui);
+      font-weight: 700;
+      margin-bottom: 16px;
+      margin-top: 0;
+      font-size: 2rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .start-content p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 24px;
+      color: #b0b0b0;
+    }
+
+    .headphones-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .input-group label {
+      font-family: var(--font-ui);
+      font-size: 0.9rem;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .input-group input {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--font-main);
+      font-size: 1.2rem;
+      padding: 8px 12px;
+      width: 100px;
+      text-align: center;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    .input-group input:focus {
+      border-color: var(--accent);
+    }
+
+    #start-btn {
+      background: transparent;
+      color: var(--text);
+      font-family: var(--font-ui);
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 12px 32px;
+      border: 2px solid var(--accent);
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    #start-btn:hover {
+      background: var(--accent);
+      color: var(--bg);
+      box-shadow: 0 0 20px rgba(168, 195, 168, 0.4);
+      transform: translateY(-2px);
+    }
+  </style>
 </head>
 
 <body>
+
+  <div id="start-screen">
+    <div class="start-content">
+      <div class="headphones-icon">🎧</div>
+      <h1>Flock Sonification</h1>
+      <p>This is a sound experiment built on top of Daniel Shiffman's steering behaviors.
+        <br>Each boid acts as a spatialized audio source emitting from its position.
+        <br><strong>Headphones are highly recommended for the best experience.</strong>
+      </p>
+
+      <div class="input-group">
+        <label for="num-boids">Initial Number of Boids:</label>
+        <input type="number" id="num-boids" value="50" min="1" max="100">
+      </div>
+
+      <button id="start-btn">Start Experience</button>
+    </div>
+  </div>
+
+  <script src="flock_sound_example.js"></script>
+
 </body>
+
+</html>
