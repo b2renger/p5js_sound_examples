@@ -25,7 +25,9 @@ function setup() {
 
 	let startBtn = document.getElementById('start-btn');
 	startBtn.addEventListener('click', () => {
-		getAudioContext().resume();
+		if (getAudioContext().state !== 'running') {
+			getAudioContext().resume();
+		}
 		document.getElementById('start-screen').style.opacity = '0';
 		setTimeout(() => {
 			document.getElementById('start-screen').style.display = 'none';
