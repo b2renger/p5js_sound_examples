@@ -142,7 +142,7 @@ class OrgaM {
 		}
 
 		this.fSliderWrap = this.createSliderWithLabel('Midi Note', 0, 127, this.midiNote, controlsDiv);
-		this.sSliderWrap = this.createSliderWithLabel('Speed', 0, speedMultipliers.length - 1, 5, controlsDiv);
+		this.sSliderWrap = this.createSliderWithLabel('Speed', 0, speedMultipliers.length - 1, 3, controlsDiv);
 		this.vSliderWrap = this.createSliderWithLabel('Volume', 0, 127, 50, controlsDiv);
 	}
 
