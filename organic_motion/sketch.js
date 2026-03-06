@@ -24,7 +24,8 @@ function setup() {
 	frameRate(25);
 
 	let startBtn = document.getElementById('start-btn');
-	startBtn.addEventListener('click', () => {
+	let startAction = (e) => {
+		if (e && e.type === 'touchstart') e.preventDefault();
 		if (getAudioContext().state !== 'running') {
 			getAudioContext().resume();
 		}
@@ -51,7 +52,9 @@ function setup() {
 				motions.push(new OrgaM(col, note, i));
 			}
 		}, 800);
-	});
+	};
+	startBtn.addEventListener('click', startAction);
+	startBtn.addEventListener('touchstart', startAction, { passive: false });
 }
 
 function draw() {
@@ -113,7 +116,8 @@ class OrgaM {
 		this.muteBtn = createButton('Unmute');
 		this.muteBtn.class('control-btn mute-btn');
 		this.muteBtn.parent(btnGroup);
-		this.muteBtn.mousePressed(() => {
+		let muteAction = (e) => {
+			if (e && e.type === 'touchstart') e.preventDefault();
 			// Mute state toggle
 			this.muteEffect = !this.muteEffect;
 			if (this.muteEffect) {
@@ -123,7 +127,9 @@ class OrgaM {
 				this.muteBtn.html('Muted');
 				this.muteBtn.addClass('active');
 			}
-		});
+		};
+		this.muteBtn.elt.addEventListener('click', muteAction);
+		this.muteBtn.elt.addEventListener('touchstart', muteAction, { passive: false });
 
 		let oscTypes = ['sine', 'triangle', 'sawtooth', 'square'];
 		this.oscBtns = [];
@@ -133,11 +139,14 @@ class OrgaM {
 			btn.class('control-btn');
 			if (i === 0) btn.addClass('active');
 			btn.parent(btnGroup);
-			btn.mousePressed(() => {
+			let oscAction = (e) => {
+				if (e && e.type === 'touchstart') e.preventDefault();
 				this.oscillator.setType(oscTypes[i]);
 				for (let ob of this.oscBtns) ob.removeClass('active');
 				btn.addClass('active');
-			});
+			};
+			btn.elt.addEventListener('click', oscAction);
+			btn.elt.addEventListener('touchstart', oscAction, { passive: false });
 			this.oscBtns.push(btn);
 		}
 
